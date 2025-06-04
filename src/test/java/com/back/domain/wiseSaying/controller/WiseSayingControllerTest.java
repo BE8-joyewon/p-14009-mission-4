@@ -5,6 +5,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class WiseSayingControllerTest {
@@ -106,5 +111,33 @@ public class WiseSayingControllerTest {
                 .contains("작가(기존) : 작자미상")
                 .contains("2 / 홍길동 / 현재와 자신을 사랑하라.")
                 .doesNotContain("2 / 작자미상 / 과거에 집착하지 마라.");
+    }
+
+    @Test
+    @DisplayName("빌드")
+    void t9() throws IOException {
+        final String out = AppTest.run(
+                commandRegister1 + commandRegister2 + "빌드\n"
+        );
+
+        assertThat(out)
+                .contains("data.json 파일의 내용이 갱신되었습니다.");
+
+        Path path = Paths.get("db/wiseSaying/data.json");
+        assertThat(Files.exists(path)).isTrue();
+        assertThat(Files.readString(path).trim()).isEqualTo("""
+                [
+                  {
+                    "id": 1,
+                    "content": "현재를 사랑하라.",
+                    "author": "작자미상"
+                  },
+                  {
+                    "id": 2,
+                    "content": "과거에 집착하지 마라.",
+                    "author": "작자미상"
+                  }
+                ]
+                """.trim());
     }
 }
